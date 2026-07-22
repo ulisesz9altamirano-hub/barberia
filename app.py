@@ -1,18 +1,35 @@
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, render_template, request
+from functools import wraps
+import os
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 import mysql.connector
 from mysql.connector import Error
-import os 
-
 
 app = Flask(__name__)
 
+# Configuración de Clave Secreta para Manejo de Sesiones (Login)
+app.secret_key = os.getenv("SECRET_KEY", "fadedshop_secret_key_2026")
+
+# Credenciales de Administrador (se leen de variables de entorno o valores por defecto)
+ADMIN_USER = os.getenv("ADMIN_USER", "admin")
+ADMIN_PASS = os.getenv("ADMIN_PASS", "123456")
+
+# Configuración de Base de Datos usando Variables de Entorno (Seguridad)
 db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "Ulises_46326980",
-    "database": "fadedshop",
-    "port": 3306,
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", "Ulises_46326980"),
+    "database": os.getenv("DB_NAME", "fadedshop"),
+    "port": int(os.getenv("DB_PORT", 3306)),
 }
 
 
@@ -24,6 +41,48 @@ def get_db_connection():
     except Error as e:
         print(f"Error al conectar a MySQL: {e}")
         return None
+
+
+# Decorador para Proteger Rutas de Administrador
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+# ==========================================================
+# RUTAS DE AUTENTICACIÓN (LOGIN Y LOGOUT)
+# ==========================================================
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        usuario = request.form.get("usuario")
+        password = request.form.get("password")
+
+        if usuario == ADMIN_USER and password == ADMIN_PASS:
+            session["admin_logged_in"] = True
+            return redirect(url_for("admin_page"))
+        else:
+            flash("Usuario o contraseña incorrectos", "error")
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("login"))
+
+
+# ==========================================================
+# RUTAS DE VISTA
+# ==========================================================
 
 
 @app.route("/")
@@ -41,8 +100,14 @@ def home():
 
 
 @app.route("/admin")
+@admin_required
 def admin_page():
     return render_template("admin.html")
+
+
+# ==========================================================
+# APIS PÚBLICAS Y DE CLIENTES
+# ==========================================================
 
 
 @app.route("/api/servicios", methods=["GET"])
@@ -97,6 +162,76 @@ def obtener_horarios():
             cursor.close()
         if conn:
             conn.close()
+
+
+@app.route("/disponibilidad", methods=["GET"])
+def ver_disponibilidad():
+    fecha_str = request.args.get("fecha", datetime.now().strftime("%Y-%m-%d"))
+    duracion_minutos = int(request.args.get("duracion", 30))
+
+    conn = get_db_connection()
+    if conn is None:
+        return (
+            jsonify({"error": "Error de conexión con la base de datos"}),
+            500,
+        )
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        query = """
+        SELECT fecha_hora_inicio, fecha_hora_fin 
+        FROM turnos 
+        WHERE estado != 'cancelado' 
+            AND fecha_hora_inicio >= %s 
+            AND fecha_hora_fin <= %s
+        """
+        cursor.execute(
+            query, (f"{fecha_str} 00:00:00", f"{fecha_str} 23:59:59")
+        )
+        turnos_ocupados = cursor.fetchall()
+
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if "cursor" in locals() and cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+    inicio_jornada = datetime.strptime(
+        f"{fecha_str} 09:00:00", "%Y-%m-%d %H:%M:%S"
+    )
+    fin_jornada = datetime.strptime(
+        f"{fecha_str} 20:00:00", "%Y-%m-%d %H:%M:%S"
+    )
+
+    horarios_disponibles = []
+    bloque_actual = inicio_jornada
+
+    while bloque_actual + timedelta(minutes=duracion_minutos) <= fin_jornada:
+        bloque_fin = bloque_actual + timedelta(minutes=duracion_minutos)
+        ocupado = False
+
+        for t in turnos_ocupados:
+            t_inicio = t["fecha_hora_inicio"]
+            t_fin = t["fecha_hora_fin"]
+
+            if bloque_actual < t_fin and bloque_fin > t_inicio:
+                ocupado = True
+                break
+
+        if not ocupado:
+            horarios_disponibles.append(bloque_actual.strftime("%H:%M"))
+
+        bloque_actual += timedelta(minutes=30)
+
+    return (
+        jsonify({
+            "fecha": fecha_str,
+            "horarios_disponibles": horarios_disponibles,
+        }),
+        200,
+    )
 
 
 @app.route("/api/turnos", methods=["POST"])
@@ -156,9 +291,9 @@ def registrar_turno():
         fin_turno = inicio_turno + timedelta(minutes=duracion)
 
         query_conflicto = """
-            SELECT id FROM turnos
-            WHERE estado != 'cancelado'
-              AND (fecha_hora_inicio < %s AND fecha_hora_fin > %s)
+            SELECT id FROM turnos 
+            WHERE estado != 'cancelado' 
+                AND (fecha_hora_inicio < %s AND fecha_hora_fin > %s)
         """
         cursor.execute(query_conflicto, (fin_turno, inicio_turno))
         conflicto = cursor.fetchone()
@@ -189,7 +324,7 @@ def registrar_turno():
             usuario_id = cursor.lastrowid
 
         query_insertar_turno = """
-            INSERT INTO turnos (usuario_id, servicio_id, fecha_hora_inicio, fecha_hora_fin, estado)
+            INSERT INTO turnos (usuario_id, servicio_id, fecha_hora_inicio, fecha_hora_fin, estado) 
             VALUES (%s, %s, %s, %s, 'confirmado')
         """
         cursor.execute(
@@ -219,7 +354,67 @@ def registrar_turno():
             conn.close()
 
 
+@app.route("/api/mis-turnos", methods=["GET"])
+def mis_turnos():
+    telefono = request.args.get("telefono")
+
+    if not telefono:
+        return (
+            jsonify({"error": "Se requiere el número de teléfono"}),
+            400,
+        )
+
+    conn = get_db_connection()
+    if conn is None:
+        return (
+            jsonify({"error": "Error de conexión con la base de datos"}),
+            500,
+        )
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT 
+                t.id,
+                COALESCE(s.nombre, 'Servicio no encontrado') AS servicio,
+                COALESCE(s.precio, 0) AS precio,
+                t.fecha_hora_inicio,
+                t.fecha_hora_fin,
+                t.estado
+            FROM turnos t
+            LEFT JOIN usuarios u ON t.usuario_id = u.id
+            LEFT JOIN servicios s ON t.servicio_id = s.id
+            WHERE u.telefono = %s AND t.estado != 'cancelado'
+            ORDER BY t.fecha_hora_inicio ASC
+        """
+        cursor.execute(query, (telefono,))
+        turnos = cursor.fetchall()
+
+        for t in turnos:
+            if isinstance(t["fecha_hora_inicio"], datetime):
+                t["fecha_hora_inicio"] = t["fecha_hora_inicio"].strftime(
+                    "%Y-%m-%d %H:%M"
+                )
+            if isinstance(t["fecha_hora_fin"], datetime):
+                t["fecha_hora_fin"] = t["fecha_hora_fin"].strftime(
+                    "%Y-%m-%d %H:%M"
+                )
+
+        return jsonify(turnos), 200
+
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if "cursor" in locals() and cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+
+
 @app.route("/api/turnos", methods=["GET"])
+@admin_required
 def obtener_turnos():
     conn = get_db_connection()
     if conn is None:
@@ -270,6 +465,7 @@ def obtener_turnos():
 
 
 @app.route("/api/turnos/<int:turno_id>", methods=["DELETE"])
+@admin_required
 def cancelar_turno(turno_id):
     conn = get_db_connection()
     if conn is None:
@@ -301,137 +497,6 @@ def cancelar_turno(turno_id):
     except Error as e:
         if conn:
             conn.rollback()
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if "cursor" in locals() and cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-
-@app.route("/disponibilidad", methods=["GET"])
-def ver_disponibilidad():
-    fecha_str = request.args.get("fecha", datetime.now().strftime("%Y-%m-%d"))
-    duracion_minutos = int(request.args.get("duracion", 30))
-
-    conn = get_db_connection()
-    if conn is None:
-        return (
-            jsonify({"error": "Error de conexión con la base de datos"}),
-            500,
-        )
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-
-        # Se arregla el espacio faltante entre fecha y hora
-        query = """
-        SELECT fecha_hora_inicio, fecha_hora_fin
-        FROM turnos
-        WHERE estado != 'cancelado'
-            AND fecha_hora_inicio >= %s
-            AND fecha_hora_fin <= %s
-        """
-
-        cursor.execute(
-            query, (f"{fecha_str} 00:00:00", f"{fecha_str} 23:59:59")
-        )
-        turnos_ocupados = cursor.fetchall()
-
-    except Error as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if "cursor" in locals() and cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-    inicio_jornada = datetime.strptime(
-        f"{fecha_str} 09:00:00", "%Y-%m-%d %H:%M:%S"
-    )
-    fin_jornada = datetime.strptime(
-        f"{fecha_str} 20:00:00", "%Y-%m-%d %H:%M:%S"
-    )
-
-    horarios_disponibles = []
-    bloque_actual = inicio_jornada
-
-    while bloque_actual + timedelta(minutes=duracion_minutos) <= fin_jornada:
-        bloque_fin = bloque_actual + timedelta(minutes=duracion_minutos)
-        ocupado = False
-
-        for t in turnos_ocupados:
-            t_inicio = t["fecha_hora_inicio"]
-            t_fin = t["fecha_hora_fin"]
-
-            if bloque_actual < t_fin and bloque_fin > t_inicio:
-                ocupado = True
-                break
-
-        if not ocupado:
-            horarios_disponibles.append(bloque_actual.strftime("%H:%M"))
-
-        bloque_actual += timedelta(minutes=30)
-
-    return (
-        jsonify({
-            "fecha": fecha_str,
-            "horarios_disponibles": horarios_disponibles,
-        }),
-        200,
-    )
-
-
-@app.route("/api/mis-turnos", methods=["GET"])
-def mis_turnos():
-    telefono = request.args.get("telefono")
-
-    if not telefono:
-        return (
-            jsonify({"error": "Se requiere el número de teléfono"}),
-            400,
-        )
-
-    conn = get_db_connection()
-    if conn is None:
-        return (
-            jsonify({"error": "Error de conexión con la base de datos"}),
-            500,
-        )
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-        # Corregido: JOIN con usuarios para filtrar bien por teléfono
-        query = """
-            SELECT 
-                t.id,
-                COALESCE(s.nombre, 'Servicio no encontrado') AS servicio,
-                COALESCE(s.precio, 0) AS precio,
-                t.fecha_hora_inicio,
-                t.fecha_hora_fin,
-                t.estado
-            FROM turnos t
-            LEFT JOIN usuarios u ON t.usuario_id = u.id
-            LEFT JOIN servicios s ON t.servicio_id = s.id
-            WHERE u.telefono = %s AND t.estado != 'cancelado'
-            ORDER BY t.fecha_hora_inicio ASC
-        """
-        cursor.execute(query, (telefono,))
-        turnos = cursor.fetchall()
-
-        for t in turnos:
-            if isinstance(t["fecha_hora_inicio"], datetime):
-                t["fecha_hora_inicio"] = t["fecha_hora_inicio"].strftime(
-                    "%Y-%m-%d %H:%M"
-                )
-            if isinstance(t["fecha_hora_fin"], datetime):
-                t["fecha_hora_fin"] = t["fecha_hora_fin"].strftime(
-                    "%Y-%m-%d %H:%M"
-                )
-
-        return jsonify(turnos), 200
-
-    except Error as e:
         return jsonify({"error": str(e)}), 500
     finally:
         if "cursor" in locals() and cursor:
