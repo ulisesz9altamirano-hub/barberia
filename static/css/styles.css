@@ -1,0 +1,402 @@
+/* ==========================================================
+   FADEDSHOP - ESTILOS BARBERÍA CLÁSICA (BLANCO, ROJO Y AZUL)
+   ========================================================== */
+
+:root {
+    --bg-principal: #eef2f7;        /* Fondo gris/azul muy claro, limpio y brillante */
+    --bg-tarjeta: #ffffff;          /* Tarjetas y contenedores blanco puro */
+    --bg-input: #f8fafc;            /* Fondo de inputs tenue */
+    --color-rojo: #e63946;          /* Rojo vivo icónico de barbería */
+    --color-rojo-hover: #c92a37;    /* Rojo más intenso al pasar el cursor */
+    --color-azul: #1d3557;          /* Azul marino profundo para títulos y texto principal */
+    --color-azul-mutado: #457b9d;   /* Azul medio para labels e indicaciones */
+    --color-verde-wa: #25d366;      /* Verde oficial de WhatsApp */
+    --color-verde-wa-hover: #1eb857;
+    --borde: #cbd5e1;               /* Bordes azulados suaves */
+    --sombra: 0 10px 25px rgba(29, 53, 87, 0.12); /* Sombra suave sin oscurecer */
+}
+
+/* Reset básico y body */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-principal);
+    color: var(--color-azul);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 10px;
+}
+
+/* Contenedor Principal */
+.container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+header h1 {
+    color: var(--color-rojo);
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+header p {
+    color: var(--color-azul-mutado);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Pestañas (Tabs) */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 12px;
+    background: var(--bg-tarjeta);
+    border: 2px solid var(--borde);
+    color: var(--color-azul-mutado);
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tabs button.active {
+    background: var(--color-azul);
+    color: #ffffff;
+    border-color: var(--color-azul);
+    box-shadow: 0 4px 15px rgba(29, 53, 87, 0.25);
+}
+
+/* Tarjeta Principal */
+.card {
+    background-color: var(--bg-tarjeta);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: var(--sombra);
+}
+
+.card h2 {
+    color: var(--color-azul);
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    border-bottom: 3px solid var(--color-rojo);
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 0.9rem;
+    color: var(--color-azul-mutado);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="date"],
+select {
+    width: 100%;
+    background-color: var(--bg-input);
+    color: var(--color-azul);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus, select:focus {
+    border-color: var(--color-rojo);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+}
+
+/* Botón Principal de Reserva */
+button[type="submit"], button[type="button"] {
+    width: 100%;
+    background-color: var(--color-rojo);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.25);
+}
+
+button[type="submit"]:hover:not(:disabled), button[type="button"]:hover {
+    background-color: var(--color-rojo-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(230, 57, 70, 0.35);
+}
+
+button:disabled {
+    background-color: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Botones de Horarios Disponibles */
+.btn-horario {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 80px;
+    padding: 10px;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--borde) !important;
+    color: var(--color-azul) !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-horario:hover {
+    border-color: var(--color-rojo) !important;
+    color: var(--color-rojo) !important;
+    background-color: #ffffff !important;
+}
+
+/* Mensajes y Respuestas */
+.mensaje {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.mensaje.exito {
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid var(--color-verde-wa);
+}
+
+.mensaje.error {
+    background: rgba(230, 57, 70, 0.1);
+    border: 1px solid var(--color-rojo);
+}
+
+/* Botón Destacado de WhatsApp */
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background-color: var(--color-verde-wa);
+    color: #ffffff;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+    background-color: var(--color-verde-wa-hover);
+    transform: translateY(-2px);
+}
+
+/* Clases Útiles */
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================
+   ESTILOS ADAPTADOS PARA TU ADMIN.HTML
+   ========================================================== */
+
+/* Ajuste general del cuerpo en la vista de Admin */
+body:has(.admin-container) {
+    align-items: flex-start;
+    padding: 40px 15px;
+}
+
+/* Contenedor más ancho para dar espacio a la tabla */
+.admin-container {
+    max-width: 1000px !important;
+}
+
+/* Header del Admin */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background: var(--bg-tarjeta);
+    padding: 20px 25px;
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--borde);
+    gap: 15px;
+}
+
+.admin-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+    color: var(--color-rojo);
+}
+
+.admin-header p {
+    color: var(--color-azul-mutado);
+    font-size: 0.9rem;
+}
+
+/* Botón "Ver vista Cliente" */
+.btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    background-color: var(--bg-input);
+    color: var(--color-azul);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-secundario:hover {
+    background-color: var(--color-azul);
+    color: #ffffff;
+    border-color: var(--color-azul);
+}
+
+/* Encabezado superior de la tarjeta (Título + Botón Refrescar) */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--borde);
+}
+
+.table-header h2 {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Botón "Actualizar" */
+.btn-refrescar {
+    width: auto !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    background-color: var(--bg-input) !important;
+    color: var(--color-azul) !important;
+    border: 1px solid var(--borde) !important;
+    box-shadow: none !important;
+}
+
+.btn-refrescar:hover {
+    background-color: var(--color-azul) !important;
+    color: #ffffff !important;
+    border-color: var(--color-azul) !important;
+}
+
+/* Contenedor responsivo con scroll para celulares */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+/* Tabla de Turnos */
+.tabla-turnos {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    white-space: nowrap; /* Evita que los datos se amontonen feo */
+}
+
+.tabla-turnos th {
+    background-color: var(--bg-input);
+    color: var(--color-azul);
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--borde);
+}
+
+.tabla-turnos td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--borde);
+    color: var(--color-azul);
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.tabla-turnos tbody tr:hover {
+    background-color: #f1f5f9; /* Sombra sutil al pasar sobre la fila */
+}
+
+/* Estilos dinámicos para los botones de Acción que genera tu JS */
+.tabla-turnos button, 
+.btn-cancelar {
+    background-color: #fee2e2 !important;
+    color: var(--color-rojo) !important;
+    border: 1px solid #fca5a5 !important;
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    width: auto !important;
+    box-shadow: none !important;
+}
+
+.tabla-turnos button:hover, 
+.btn-cancelar:hover {
+    background-color: var(--color-rojo) !important;
+    color: #ffffff !important;
+}
+
+/* Ajuste para pantallas chicas (Celulares) */
+@media (max-width: 600px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .btn-secundario {
+        width: 100%;
+    }
+}

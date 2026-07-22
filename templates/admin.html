@@ -1,0 +1,48 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, inicial-scale=1.0">
+    <title>FADEDSHOP - Panel de administración</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container admin-container">
+        <header class="admin-header">
+            <div>
+                <h1>Fadedshop - Panel admin</h1>
+                <p>Gestión y control de turnos agendados</p>
+            </div>
+            <a href="/" class="btn-secundario">Ver vista Cliente</a>
+        </header>
+        <main class="card">
+            <div class="table-header">
+                <h2>Proximos Turnos</h2>
+                <button id="btnRefrescar" class="btn-refrescar">🔄 Actualizar</button>
+            </div>
+ 
+            <div class="table-responsive">
+                <table class="tabla-turnos">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Servicio</th>
+                            <th>Fecha / Hora</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTurnosBody">
+
+                    </tbody>
+                </table>
+            </div>
+            <div id="mensajeAdmin" class="mensaje hidden"></div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FADEDSHOP - RESERVA TU TURNO</title>
+
+    <!-- FontAwesome para los iconos (WhatsApp, calendarios, etc.) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Fadedshop</h1>
+            <p>¡¡¡Reserva tu turno en línea rápido y fácil!!!</p>
+        </header>
+
+        <!-- Navegación entre Solicitar y Consultar Turnos -->
+        <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button id="btnTabReserva" class="active" onclick="mostrarSeccion('reserva')">Solicitar Turno</button>
+            <button id="btnTabMisTurnos" onclick="mostrarSeccion('misturnos')">Mis Turnos</button>
+        </div>
+
+        <!-- SECCIÓN 1: SOLICITAR TURNO -->
+        <main class="card" id="sec-reserva">
+            <h2>Solicitar turno</h2>
+            
+            <form id="turnoform">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo:</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Ulises Altamirano" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono / WhatsApp:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Ej: 2617111500" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="servicio">Selecciona el servicio:</label>
+                    <select id="servicio" name="servicio_id" required> 
+                        <option value="" disabled selected>Selecciona un servicio</option>
+                        {% for servicio in servicios %}
+                            <option value="{{ servicio.id }}" data-duracion="{{ servicio.duracion_minutos }}">
+                                {{ servicio.nombre }} - ${{ servicio.precio }} ({{ servicio.duracion_minutos }} min)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Selección de Fecha y Horarios Disponibles -->
+                <div class="form-group">
+                    <label for="fecha">Selecciona el día:</label>
+                    <input type="date" id="fecha" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Horarios disponibles:</label>
+                    <div id="contenedor-horarios" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                        <p style="font-size: 0.9em; opacity: 0.7;">Selecciona servicio y fecha para ver disponibilidades.</p>
+                    </div>
+                    <!-- Campo oculto para enviar la fecha_hora_inicio seleccionada al backend -->
+                    <input type="hidden" id="fecha_hora_inicio" name="fecha_hora_inicio" required>
+                </div>
+
+                <button type="submit" id="btnReservar" disabled>Reservar Turno</button>
+            </form>
+
+            <!-- ACÁ SE INYECTA DINÁMICAMENTE EL MENSAJE + BOTÓN DE WHATSAPP CON JS -->
+            <div id="mensaje" class="mensaje hidden"></div>
+        </main>
+
+        <!-- SECCIÓN 2: MIS TURNOS -->
+        <main class="card hidden" id="sec-misturnos">
+            <h2>Mis Turnos Agendados</h2>
+            
+            <div class="form-group">
+                <label for="buscar_telefono">Ingresá tu teléfono para buscar tus turnos:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="tel" id="buscar_telefono" placeholder="Ej: 2617111500">
+                    <button type="button" onclick="consultarMisTurnos()">Buscar</button>
+                </div>
+            </div>
+
+            <div id="lista-mis-turnos" style="margin-top: 20px;">
+                <!-- Se cargan dinámicamente con JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Principal -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
