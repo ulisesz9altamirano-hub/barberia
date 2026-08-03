@@ -155,10 +155,10 @@ async function guardarTurno(event) {
             const fechaHora = document.getElementById('fecha_hora_inicio').value;
 
             // Preparamos el texto de WhatsApp
-            const textoMensaje = `¡Hola! Acabo de reservar un turno en Faded Shop 💈\n\n` +
-                                 `👤 *Nombre:* ${formData.get('nombre')}\n` +
-                                 `✂️ *Servicio:* ${servicioNombre}\n` +
-                                 `📅 *Fecha y hora:* ${fechaHora} hs\n\n` +
+            const textoMensaje = `¡Hola! Acabo de reservar un turno en Faded Shop \n\n` +
+                                 ` *Nombre:* ${formData.get('nombre')}\n` +
+                                 ` *Servicio:* ${servicioNombre}\n` +
+                                 ` *Fecha y hora:* ${fechaHora} hs\n\n` +
                                  `¿Me confirman la recepción? ¡Muchas gracias!`;
 
             const urlWhatsapp = `https://wa.me/${telefonoBarberia}?text=${encodeURIComponent(textoMensaje)}`;
