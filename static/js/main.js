@@ -65,14 +65,19 @@ async function actualizarHorarios() {
     const fecha = fechaInput.value;
 
     if (!servicioSelect.value || !fecha) {
-        contenedor.innerHTML = '<p style="font-size: 0.9em; opacity: 0.7;">Seleccioná un servicio y una fecha para ver las horas disponibles.</p>';
+        contenedor.innerHTML = `
+            <p class="empty-state-text">
+                <i class="fas fa-info-circle"></i> Seleccioná un servicio y una fecha para ver las horas disponibles.
+            </p>`;
         return;
     }
 
-    contenedor.innerHTML = '<p style="font-size: 0.9em; opacity: 0.7;">Buscando disponibilidad...</p>';
+    contenedor.innerHTML = `
+        <p class="empty-state-text">
+            <i class="fas fa-spinner fa-spin"></i> Buscando disponibilidad...
+        </p>`;
 
     try {
-        // CORREGIDO: Llamada a /disponibilidad en lugar de /api/disponibilidad
         const response = await fetch(`/disponibilidad?fecha=${fecha}&duracion=${duracion}`);
         const data = await response.json();
 
@@ -83,41 +88,40 @@ async function actualizarHorarios() {
         contenedor.innerHTML = '';
 
         if (!data.horarios_disponibles || data.horarios_disponibles.length === 0) {
-            contenedor.innerHTML = '<p style="color: #e74c3c; font-size: 0.9em;">No hay horarios disponibles para esta fecha. Intentá con otro día.</p>';
+            contenedor.innerHTML = `
+                <p class="empty-state-text" style="color: var(--color-rojo); border-color: rgba(230, 57, 70, 0.3);">
+                    <i class="fas fa-calendar-times"></i> No hay horarios disponibles para esta fecha. Intentá con otro día.
+                </p>`;
             return;
         }
 
-        // Renderizamos cada horario como un botón interactivo
+        // Renderizamos cada horario como un botón chip interactivo
         data.horarios_disponibles.forEach(horario => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn-horario';
-            btn.style.cssText = 'padding: 8px 12px; cursor: pointer; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; margin: 3px;';
-            btn.innerText = `${horario} hs`;
+            btn.className = 'btn-horario-chip';
+            btn.innerHTML = `<i class="far fa-clock"></i> ${horario} hs`;
 
             btn.onclick = () => seleccionarHorario(btn, fecha, horario);
             contenedor.appendChild(btn);
         });
 
     } catch (error) {
-        contenedor.innerHTML = `<p style="color: #e74c3c; font-size: 0.9em;">${error.message}</p>`;
+        contenedor.innerHTML = `
+            <p class="empty-state-text" style="color: var(--color-rojo);">
+                <i class="fas fa-exclamation-triangle"></i> ${error.message}
+            </p>`;
     }
 }
 
 // 3. Marcar el horario elegido y llenar el input oculto
 function seleccionarHorario(botonSeleccionado, fecha, horario) {
-    // Desmarcamos los demás botones
-    const botones = document.querySelectorAll('.btn-horario');
-    botones.forEach(b => {
-        b.style.background = '#222';
-        b.style.borderColor = '#444';
-        b.style.color = '#fff';
-    });
+    // Desmarcamos los demás botones quitando la clase active
+    const botones = document.querySelectorAll('.btn-horario-chip');
+    botones.forEach(b => b.classList.remove('active'));
 
     // Destacamos el seleccionado
-    botonSeleccionado.style.background = '#f39c12';
-    botonSeleccionado.style.borderColor = '#f39c12';
-    botonSeleccionado.style.color = '#000';
+    botonSeleccionado.classList.add('active');
 
     // Formateamos para el backend: YYYY-MM-DD HH:MM:SS
     const fechaHoraCompleta = `${fecha} ${horario}:00`;
@@ -137,8 +141,8 @@ async function guardarTurno(event) {
     const mensajeDiv = document.getElementById('mensaje');
     const formData = new FormData(form);
 
-    // Número de teléfono de la barbería (formato internacional sin '+' ni espacios, ej: 549261XXXXXXX)
-    const telefonoBarberia = "2617111500"; // <-- Cambiá este número por el tuyo
+    // Número de teléfono de la barbería
+    const telefonoBarberia = "2617111500";
 
     try {
         const response = await fetch('/api/turnos', {
@@ -155,10 +159,10 @@ async function guardarTurno(event) {
             const fechaHora = document.getElementById('fecha_hora_inicio').value;
 
             // Preparamos el texto de WhatsApp
-            const textoMensaje = `¡Hola! Acabo de reservar un turno en Faded Shop \n\n` +
-                                 ` *Nombre:* ${formData.get('nombre')}\n` +
-                                 ` *Servicio:* ${servicioNombre}\n` +
-                                 ` *Fecha y hora:* ${fechaHora} hs\n\n` +
+            const textoMensaje = `¡Hola! Acabo de reservar un turno en Faded Shop 💈\n\n` +
+                                 `👤 *Nombre:* ${formData.get('nombre')}\n` +
+                                 `✂️ *Servicio:* ${servicioNombre}\n` +
+                                 `📅 *Fecha y hora:* ${fechaHora} hs\n\n` +
                                  `¿Me confirman la recepción? ¡Muchas gracias!`;
 
             const urlWhatsapp = `https://wa.me/${telefonoBarberia}?text=${encodeURIComponent(textoMensaje)}`;
@@ -180,7 +184,7 @@ async function guardarTurno(event) {
         }
     } catch (error) {
         mensajeDiv.className = 'mensaje error';
-        mensajeDiv.style.color = '#e74c3c';
+        mensajeDiv.style.color = 'var(--color-rojo)';
         mensajeDiv.innerText = error.message;
         mensajeDiv.classList.remove('hidden');
     }
@@ -197,7 +201,7 @@ async function consultarMisTurnos() {
     }
 
     const telefono = telefonoInput.value.trim();
-    contenedor.innerHTML = '<p style="font-size: 0.9em; opacity: 0.7;">Buscando tus turnos...</p>';
+    contenedor.innerHTML = '<p class="empty-state-text"><i class="fas fa-spinner fa-spin"></i> Buscando tus turnos...</p>';
 
     try {
         const response = await fetch(`/api/mis-turnos?telefono=${telefono}`);
@@ -210,27 +214,36 @@ async function consultarMisTurnos() {
         contenedor.innerHTML = '';
 
         if (turnos.length === 0) {
-            contenedor.innerHTML = '<p style="font-size: 0.9em; opacity: 0.7;">No tenés turnos agendados con este número.</p>';
+            contenedor.innerHTML = '<p class="empty-state-text"><i class="fas fa-search"></i> No tenés turnos agendados con este número.</p>';
             return;
         }
 
         turnos.forEach(t => {
             const tarjeta = document.createElement('div');
-            tarjeta.style.cssText = 'padding: 12px; margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; background: #1a1a1a; display: flex; justify-content: space-between; align-items: center;';
+            tarjeta.style.cssText = `
+                padding: 14px; 
+                margin-bottom: 10px; 
+                border: 1px solid var(--borde); 
+                border-radius: 10px; 
+                background: var(--bg-input); 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center;
+            `;
             tarjeta.innerHTML = `
                 <div>
-                    <h4 style="margin: 0; color: #f39c12;">${t.servicio}</h4>
-                    <p style="margin: 4px 0 0; font-size: 0.85em; opacity: 0.8;">📅 ${t.fecha_hora_inicio} hs</p>
-                    <p style="margin: 2px 0 0; font-size: 0.85em; color: #2ecc71;">$${t.precio}</p>
+                    <h4 style="margin: 0; color: var(--color-azul); font-weight: 700;">✂️ ${t.servicio}</h4>
+                    <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--color-azul-mutado);">📅 ${t.fecha_hora_inicio} hs</p>
+                    <p style="margin: 2px 0 0; font-size: 0.85em; font-weight: bold; color: var(--color-rojo);">$${t.precio}</p>
                 </div>
                 <div>
-                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75em; text-transform: uppercase; background: #222; border: 1px solid #555;">${t.estado}</span>
+                    <span style="padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: 700; text-transform: uppercase; background: var(--bg-tarjeta); color: var(--color-azul); border: 1px solid var(--borde);">${t.estado}</span>
                 </div>
             `;
             contenedor.appendChild(tarjeta);
         });
 
     } catch (error) {
-        contenedor.innerHTML = `<p style="color: #e74c3c; font-size: 0.9em;">${error.message}</p>`;
+        contenedor.innerHTML = `<p class="empty-state-text" style="color: var(--color-rojo);"><i class="fas fa-exclamation-circle"></i> ${error.message}</p>`;
     }
 }

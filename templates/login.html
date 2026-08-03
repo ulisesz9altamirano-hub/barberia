@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FADEDSHOP - Panel Admin</title>
+
+    <!-- FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Estilos CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -14,26 +19,36 @@
         </header>
         
         <main class="card">
-            <form action="/login" method="POST">
+            <form action="{{ url_for('login') }}" method="POST">
                 <div class="form-group">
                     <label for="usuario">Usuario:</label>
-                    <input type="text" id="usuario" name="usuario" required placeholder="Usuario">
+                    <input type="text" id="usuario" name="usuario" required placeholder="Ingresá tu usuario">
                 </div>
+                
                 <div class="form-group">
                     <label for="password">Contraseña:</label>
-                    <input type="password" id="password" name="password" required placeholder="Contraseña">
+                    <input type="password" id="password" name="password" required placeholder="Ingresá tu contraseña">
                 </div>
                 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
-                      <p style="color: var(--color-rojo); font-size: 0.85rem; margin-bottom: 15px; text-align: center; font-weight: bold;">{{ message }}</p>
+                      <div class="mensaje error" style="margin-top: 0; margin-bottom: 15px; padding: 10px;">
+                          <p style="color: var(--color-rojo); font-size: 0.85rem; text-align: center; font-weight: bold; margin: 0;">{{ message }}</p>
+                      </div>
                     {% endfor %}
                   {% endif %}
                 {% endwith %}
 
                 <button type="submit">Ingresar</button>
             </form>
+
+            <!-- Botón para regresar a la vista cliente -->
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid var(--borde); padding-top: 15px;">
+                <a href="{{ url_for('home') }}" style="color: var(--color-azul-mutado); text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-arrow-left"></i> Volver a Reservas
+                </a>
+            </div>
         </main>
     </div>
 </body>

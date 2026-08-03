@@ -123,21 +123,17 @@ label {
 input[type="text"],
 input[type="tel"],
 input[type="date"],
+input[type="password"], /* <-- Agregamos esta línea */
 select {
     width: 100%;
     background-color: var(--bg-input);
     color: var(--color-azul);
     border: 1px solid var(--borde);
-    border-radius: 10px;
+    border-radius: 10px; /* Bordes redondeados unificados */
     padding: 12px 14px;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-input:focus, select:focus {
-    border-color: var(--color-rojo);
-    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
 }
 
 /* Botón Principal de Reserva */
@@ -399,4 +395,220 @@ body:has(.admin-container) {
     .btn-secundario {
         width: 100%;
     }
+}
+/* ==========================================================
+   BOTÓN ACCESO ADMIN - PALETA BARBERÍA CLÁSICA
+   ========================================================== */
+
+.btn-admin-tab {
+    background-color: var(--bg-tarjeta);
+    color: var(--color-azul);
+    border: 2px solid var(--color-azul);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(29, 53, 87, 0.08);
+}
+
+.btn-admin-tab:hover {
+    background-color: var(--color-azul);
+    color: #ffffff;
+    border-color: var(--color-azul);
+    box-shadow: 0 4px 12px rgba(29, 53, 87, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-admin-tab i {
+    color: var(--color-rojo);
+    transition: color 0.3s ease;
+}
+
+.btn-admin-tab:hover i {
+    color: #ffffff;
+}
+/* ==========================================================
+   MEJORAS VISUALES - SECCIÓN SOLICITAR TURNO
+   ========================================================== */
+
+/* Header dentro de la tarjeta */
+.card-header-custom {
+    margin-bottom: 22px;
+}
+
+.card-header-custom h2 {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 4px !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header-custom h2 i {
+    color: var(--color-rojo);
+}
+
+.subtitle-card {
+    color: var(--color-azul-mutado);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+/* Pasos numerados (Step Badges) */
+.form-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0 12px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--borde);
+}
+
+.step-badge {
+    background-color: var(--color-rojo);
+    color: #ffffff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.step-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-azul);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Disposición en fila para Nombre y Teléfono en pantallas medianas/grandes */
+@media (min-width: 480px) {
+    .form-row {
+        display: flex;
+        gap: 12px;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+}
+
+/* Iconos dentro de los Labels */
+label i {
+    color: var(--color-rojo);
+    margin-right: 4px;
+}
+
+/* Custom Select Styling */
+.select-wrapper {
+    position: relative;
+}
+
+select {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Contenedor de Horarios */
+.horarios-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.empty-state-text {
+    font-size: 0.88rem;
+    color: var(--color-azul-mutado);
+    background-color: var(--bg-input);
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    border: 1px dashed var(--borde);
+}
+
+/* Botón Principal Confirmar */
+.btn-reservar-main {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1.05rem !important;
+}
+
+/* Footer enlace admin */
+.footer-admin-link {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid var(--borde);
+    text-align: center;
+}
+
+.footer-admin-link a {
+    color: var(--color-azul-mutado);
+    text-decoration: none;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.footer-admin-link a:hover {
+    color: var(--color-rojo);
+}
+/* ==========================================================
+   CHIPS / BOTONES DE HORARIO
+   ========================================================== */
+
+.btn-horario-chip {
+    background-color: var(--bg-input);
+    color: var(--color-azul);
+    border: 1.5px solid var(--borde);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.25s ease;
+}
+
+.btn-horario-chip i {
+    color: var(--color-azul-mutado);
+    font-size: 0.85rem;
+    transition: color 0.25s ease;
+}
+
+/* Hover en chips */
+.btn-horario-chip:hover {
+    border-color: var(--color-azul);
+    background-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Estado Seleccionado / Activo */
+.btn-horario-chip.active {
+    background-color: var(--color-azul) !important;
+    color: #ffffff !important;
+    border-color: var(--color-azul) !important;
+    box-shadow: 0 4px 10px rgba(29, 53, 87, 0.25);
+}
+
+.btn-horario-chip.active i {
+    color: var(--color-rojo) !important;
 }
